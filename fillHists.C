@@ -546,7 +546,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
 
     if(channel=="ee"){
       TLorentzVector ee = el1->P4()+el2->P4();
-      TH1Hists["hist_SR_Mee"].Fill(ee.M());
+      TH1Hists["hist_SR_Mee"].Fill(ee.M(),weight);
       TLorentzVector eejj = el1->P4()+el2->P4()+jet1->P4()+jet2->P4()+jet3->P4()+jet4->P4();
       TH1Hists["hist_SR_eejjjjMass"].Fill(eejj.M(),weight);
       float H = el1->PT+el2->PT+jet1->PT+jet2->PT+jet3->PT+jet4->PT;
