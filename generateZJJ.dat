@@ -1,0 +1,36 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s b u~ c~ d~ s~ b~
+define j = g u c d s b u~ c~ d~ s~ b~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+generate p p > z, z > l+ l- @0
+add process p p > z j, z > l+ l- @1
+add process p p > z j j, z > l+ l- @2
+add process p p > z j j j, z > l+ l- @3
+add process p p > z j j j j, z > l+ l- @4
+output /data/atlas/dbetalhc/zjjBig
+launch /data/atlas/dbetalhc/zjjBig -i
+#launch-cluster 
+#output /data/user/e/edson/zjj
+#launch /data/user/e/edson/zjj -i
+multi_run 20
+pythia=ON
+pgs=OFF
+delphes=ON
+set run_card ptj 40
+set cut_decays True
+set ptb 40
+set mmnl 40
+set ptl 40
+#set ickkw 1
+#set xqcut 10
+set ebeam1 6500
+set ebeam2 6500
+set nevents 1000000
+print_results --path=/data/atlas/dbetalhc/zjjBig/cs.txt --format=short
