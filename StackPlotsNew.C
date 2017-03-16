@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-std::string path="22_10_16/";
+std::string path="09_03_17/";
 
 Color_t ci[] = {kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack,kWhite,kBlack};
 Color_t cf[] = {kMagenta+3,kGreen-3,kGreen+5,kCyan,kMagenta-3,kGreen,kBlue,kRed,kYellow,kBlack,kBlue-3, kBlue+3, kMagenta+3,kGreen-3,kGreen+5,kCyan,kMagenta-3,kGreen,kBlue,kRed,kYellow,kBlack,kBlue-3, kBlue+3, kMagenta+3};
@@ -66,14 +66,15 @@ void doStackPlot(std::vector<std::string> dataset, std::string hist_name, std::v
 
   for(Int_t i = dataset.size()-1; i >= 0; --i){
     //for(Int_t i = 0; i < dataset.size(); i++){
-    //std::cout << "i: " << i << std::endl;
+    std::cout << "i: " << i << std::endl;
     // Only stack background histograms
     if(process.at(i).find("signal") != std::string::npos ) continue;
     index1++;
     temp_name << hist_name << "_" << process.at(i);
+    std::cout << "temp_name: " << temp_name.str() << std::endl;
     TFile *f = TFile::Open(dataset.at(i).c_str(),"READ");
     TH1F *htemp = (TH1F*)f->Get(hist_name.c_str());
-    if(htemp->Integral()==0) {temp_name.str("");continue;}
+    if(htemp->Integral()==0) {temp_name.str("");std::cout << "Histogram have zero integral" << std::endl; continue;}
     labels.push_back(label_map[process.at(i)]);
     h[index]=(TH1F*)htemp->Clone(temp_name.str().c_str());
     h[index]->SetLineWidth(2);
@@ -169,8 +170,17 @@ void doStackPlot(std::vector<std::string> dataset, std::string hist_name, std::v
 
    if(hist_name.find("VR_nJets") != std::string::npos){
      f->cd();
-     h[40] =(TH1F*)(hs->GetStack()->Last());
-     h[40]->Write((hist_name+"_"+channel).c_str());
+     if(channel == "ee"){
+       std::cout << "Here ee" << hist_name << std::endl;
+       h[40] =(TH1F*)(hs->GetStack()->Last());
+       std::cout << h[40]->GetName() << std::endl;
+       h[40]->Write((hist_name+"_"+channel).c_str());
+     }else if(channel == "mumu"){
+       std::cout << "Here mm" << std::endl;
+       h[41] =(TH1F*)(hs->GetStack()->Last());
+       std::cout << h[41]->GetName() << std::endl;
+       h[41]->Write((hist_name+"_"+channel).c_str());
+     }
    }
 
 }
@@ -178,12 +188,10 @@ void doStackPlot(std::vector<std::string> dataset, std::string hist_name, std::v
 void stackThemOut(std::string channel)
 {
 
-  f = TFile::Open("GetScaleFactor.root","RECREATE");
-
   std::vector<std::string> process;
   process.push_back("ttbarlep");
-  process.push_back("zjjhpT");
-  process.push_back("zjj");
+  //process.push_back("zjjhpT");
+  process.push_back("zjjBig");
   process.push_back("ttw");
   process.push_back("ttz");
   process.push_back("twlep");
@@ -213,8 +221,8 @@ void stackThemOut(std::string channel)
 
   std::map<std::string,std::string> label_map;
   label_map["ttbarlep"]="t#bar{t}";
-  label_map["zjjhpT"]="Z+jets high pT";
-  label_map["zjj"]="Z+jets";
+  //label_map["zjjhpT"]="Z+jets high pT";
+  label_map["zjjBig"]="Z+jets";
   label_map["ttw"]="t#bar{t}W";
   label_map["ttz"]="t#bar{t}Z";
   label_map["twlep"]="tW";
@@ -271,11 +279,10 @@ void stackThemOut(std::string channel)
   doStackPlot(dataset,"hist_VR_MuPT_chflip",process,10,"p_{T}^{#mu} [GeV]",label_map,channel,1);
   doStackPlot(dataset,"hist_VR_nJets",process,1.2,"N Jets",label_map,channel,0);
 
-  f->Write();
-  f->Close();
-
   const char* command;
   command=("tar -zcvf "+path+channel+"Plots.tar.gz "+path+"/*"+channel+".png ").c_str();
+  gSystem->Exec(command);
+  command=("rm "+path+"/*.png").c_str();
   gSystem->Exec(command);
 
 }
@@ -285,8 +292,12 @@ void StackPlotsNew()
   gROOT->SetBatch(1);
   gSystem->Load("libDelphes");
 
+  f = TFile::Open((path+"GetScaleFactor.root").c_str(),"RECREATE");
+
   stackThemOut("ee");
   stackThemOut("emu");
   stackThemOut("mumu");
 
+  f->Write();
+  f->Close();
 }
