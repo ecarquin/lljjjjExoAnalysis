@@ -19,10 +19,10 @@
 #include <string>
 #include <sstream>
 
-std::string outDir = "22_10_16/";
+std::string outDir = "09_03_17/";
+bool m_debug=false;
 
-
-void processChain(std::string inputFile, std::string tag,std::string channel,std::string path, bool hasMerge, int nSplit, int fileN,std::map<std::string,float>& yields, std::map<std::string,float>& yieldsw)
+bool processChain(std::string inputFile, std::string tag,std::string channel,std::string path, bool hasMerge, int nFiles, int iFile, int fileI, int fileN, std::map<std::string,float>& yields, std::map<std::string,float>& yieldsw)
 {
 
   // Variables
@@ -36,7 +36,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
   if(!hasMerge) cs = readCS(cs_name,Nevents);
   else cs = readAvMergedCS(cs_name,Nevents);
 
-  TFile *f = TFile::Open("chargeFlipAtlas.root","READ");
+  TFile *f = TFile::Open("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/chargeFlipAtlas.root","READ");
   TH1F* etaBinning = (TH1F*)f->Get("etaBinning");
   TH1F* lowPt = (TH1F*)f->Get("lowPt");
   TH1F* mediumPt = (TH1F*)f->Get("mediumPt");
@@ -47,16 +47,18 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
   // Create chain of root trees
   //Add the case in which the input is split in several input Files
   TChain chain("Delphes");
-  if(fileN==-1)chain.Add(inputFile.c_str());
-  else{
-   for(unsigned int i=0;i<nSplit;i++){
+  std::cout << "nFiles= " << nFiles << " iFile= " << iFile << std::endl;
+  if(nFiles != -1){
+   for(unsigned int i=0;i<nFiles;i++){
       std::stringstream run;
       run <<i;
       std::string file=path+tag+"/Events/run_01_"+run.str()+"/tag_1_delphes_events.root";
-      std::cout << file << std::endl;
-      if(i==fileN)chain.Add(file.c_str());
+      std::cout << "File name: " << file << std::endl;
+      if(i==iFile)chain.Add(file.c_str());
       run.str("");
    }
+  }else{
+    chain.Add(inputFile.c_str());
   }
   
   // Create object of class ExRootTreeReader
@@ -71,7 +73,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
 
   float xBins[14] = {24.0,30.0,40.0,50.0,60.0,70.0,90.0,110.0,130.0,150.0,200.0,250.0,500.0,800.0};
 
-  TFile *SF = TFile::Open("SF.root","READ");
+  TFile *SF = TFile::Open("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/SF.root","READ");
   TH1F* sf_ee=(TH1F*)SF->Get("sf_ee");
   TH1F* sf_mumu=(TH1F*)SF->Get("sf_mumu");
 
@@ -138,8 +140,19 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
   TH1Hists["hist_VR_EleEta"] = TH1F("hist_VR_EleEta", "Electron Eta",16,-5,5);
   TH1Hists["hist_VR_MET"] = TH1F("hist_VR_MET", "MET", 20, 0.0, 400.0);
   TH1Hists["hist_VR_nJets"] = TH1F("hist_VR_nJets","N-Jets",6,-0.5,5.5);
+  TH1Hists["hist_VR_OS_nJets"] = TH1F("hist_VR_OS_nJets","N-Jets OS",6,-0.5,5.5);
+  TH1Hists["hist_VR_OS_HT"] = TH1F("hist_VR_OS_HT","HT OS",200,0.0,4000.0);
 
   TH1Hists["hist_SR_Mee"] = TH1F("hist_SR_Mee","Mee",100,0,200);
+
+  TH1Hists["hist_CutFlow"]   = TH1F("hist_CutFlow","CutFlow",6,-0.5,5.5);
+  TH1Hists["hist_CutFlow_Weighted"]   = TH1F("hist_CutFlow_Weighted","CutFlow Weighted",6,-0.5,5.5);
+
+  TH1Hists["hist_VR_OS_nJets"].SetYTitle("Events");
+  TH1Hists["hist_VR_OS_nJets"].SetXTitle("nJets");
+
+  TH1Hists["hist_VR_OS_HT"].SetYTitle("Events");
+  TH1Hists["hist_VR_OS_HT"].SetXTitle("HT [GeV]");
 
   TH1Hists["hist_SR_LQMassE"].SetYTitle("Events");
   TH1Hists["hist_SR_LQMassE"].SetXTitle("m_{ejj} [GeV]");
@@ -151,19 +164,19 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
   TH1Hists["hist_SR_eejjjjMass"].SetXTitle("m_{eejjjj} [GeV]");
 
   TH1Hists["hist_SR_Heejjjj"].SetYTitle("Events");
-  TH1Hists["hist_SR_Heejjjj"].SetXTitle("H [GeV]");
+  TH1Hists["hist_SR_Heejjjj"].SetXTitle("HT [GeV]");
 
   TH1Hists["hist_SR_emujjjjMass"].SetYTitle("Events");
   TH1Hists["hist_SR_emujjjjMass"].SetXTitle("m_{eejjjj} [GeV]");
 
   TH1Hists["hist_SR_Hemujjjj"].SetYTitle("Events");
-  TH1Hists["hist_SR_Hemujjjj"].SetXTitle("H [GeV]");
+  TH1Hists["hist_SR_Hemujjjj"].SetXTitle("HT [GeV]");
 
   TH1Hists["hist_SR_mumujjjjMass"].SetYTitle("Events");
   TH1Hists["hist_SR_mumujjjjMass"].SetXTitle("m_{eejjjj} [GeV]");
 
   TH1Hists["hist_SR_Hmumujjjj"].SetYTitle("Events");
-  TH1Hists["hist_SR_Hmumujjjj"].SetXTitle("H [GeV]");
+  TH1Hists["hist_SR_Hmumujjjj"].SetXTitle("HT [GeV]");
 
   TH1Hists["hist_SR_Mee"].SetYTitle("Events");
   TH1Hists["hist_SR_Mee"].SetXTitle("M [GeV]");
@@ -173,60 +186,103 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
 
   std::string fname;
 
-  if(fileN!=-1){
+  if(nFiles!=-1 && fileN!=-1){
      std::stringstream ss;
-     ss << fileN;
+     ss << iFile;
+     std::string N1= ss.str();
+     ss.str("");
+     if(fileN!=-1){
+       ss << fileI;
+       std::string N2=ss.str();
+       fname = "hists_"+channel+"_"+tag+"_"+N1+"_"+N2+".root";
+     } else{
+       fname = "hists_"+channel+"_"+tag+"_"+N1+".root";
+     }
+  }else if(fileN!=-1 && nFiles==-1){
+     std::stringstream ss;
+     ss << fileI;
      std::string N= ss.str();
+     ss.str("");
      fname = "hists_"+channel+"_"+tag+"_"+N+".root";
-  }else  
-    fname = "hists_"+channel+"_"+tag+".root";
+  }else if(fileN==-1 && nFiles!=-1){
+     std::stringstream ss;
+     ss << iFile;
+     std::string N= ss.str();
+     ss.str("");
+     fname = "hists_"+channel+"_"+tag+"_"+N+".root";
+  }else{
+     fname = "hists_"+channel+"_"+tag+".root";
+  }
 
-  std::cout << "After that" << std::endl;
   TFile *f0 = TFile::Open((outDir+fname).c_str(),"RECREATE");
 
-  if( (tag.find("signal") != std::string::npos) || (tag.find("wwjj") != std::string::npos))
-    numberOfEntries=20000;
+  //if( (tag.find("signal") != std::string::npos) || (tag.find("wwjj") != std::string::npos))
+  //  numberOfEntries=20000;
 
   // Variables
   //float lum = 100; //in fb^{-1}
-  if(fileN==-1) Nevents  = numberOfEntries;
-  float weight = cs * lum * 1e3 / Nevents;
+  if(nFiles==-1) Nevents  = numberOfEntries;
   float rand = 0.0;
   int njets=0;
 
   std::cout << "Will run over: " << numberOfEntries << " number of entries" << " cross section is: " << cs << " Nevents of total sample is: " << Nevents << std::endl; 
+  std::vector<float> prob;
+
+  int step = numberOfEntries/fileN;
+  std::cout << "Using a step = " << step << std::endl;
+  int istart = step*fileI;
+  int iends  = step*(fileI+1);
+
+  if(numberOfEntries%fileN != 0 && (fileI == (fileN-1))){
+    iends += numberOfEntries%fileN;
+    std::cout << "Step changed to: " << iends-istart << std::endl;
+    std::cout << "Checking total number of events: " << step*(fileN-1) + iends-istart << " should equal: " << numberOfEntries << std::endl;
+    if(step*(fileN-1) + (iends-istart) != numberOfEntries){
+      std:cout << "Number of events to run doesn't span the full dataset, failing now..." << std::endl;
+      return 1; 
+    }else{
+      std::cout << "Correct job splitting found, continuing..." << std::endl;
+    }
+    //std::cout << "Error: Cannot split job " << numberOfEntries%fileN << std::endl;
+    //return 1;
+  }
 
   // Loop over all events
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry)
+  for(Int_t entry = istart; entry < iends; ++entry)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
+    //std::cout << "Entry: " << entry << std::endl;
     if(entry%1000==0){
       std::cout << "Entry: " << entry << std::endl;
       const char* command="date \"+%H:%M:%S   %d/%m/%y\"";
       gSystem->Exec(command);
     }
-    //if(entry==100) break;
+    //if(entry==1000) break;
+
+    float HT=0.0;
 
     //Get electrons
     std::vector<Electron*> electrons;
     for(unsigned int i=0;i<branchElectron->GetEntries();i++){
        Electron *el=(Electron*)branchElectron->At(i);
-       if(fabs(el->Eta) < 2.47 && el->PT > 20) electrons.push_back(el);
+       Int_t binx=lowPt->GetXaxis()->FindBin(fabs(el->Eta));
+       if(binx==4) continue;
+       if(fabs(el->Eta) < 2.47 && el->PT > 20) {electrons.push_back(el);HT+=el->PT;}
     }
 
     //Get muons
     std::vector<Muon*> muons;
     for(unsigned int i=0;i<branchMuon->GetEntries();i++){
        Muon *mu=(Muon*)branchMuon->At(i);
-       if(fabs(mu->Eta) < 2.5 && mu->PT > 20) muons.push_back(mu);
+       if(fabs(mu->Eta) < 2.5 && mu->PT > 20) {muons.push_back(mu);HT+=mu->PT;}
     }
 
     //Get jets
     std::vector<Jet*> jetz;
     for(unsigned int i=0;i<branchJet->GetEntries();i++){
        Jet *jet=(Jet*)branchJet->At(i);
-       if(fabs(jet->Eta) < 2.8 && jet->PT > 20) jetz.push_back(jet);
+       if(fabs(jet->Eta) < 2.8 && jet->PT > 20) {jetz.push_back(jet);HT+=jet->PT;}
     }
 
     int nElectrons = electrons.size();
@@ -234,22 +290,36 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
 
     bool passSel=false;
 
+    float weight = cs * lum * 1e3 / Nevents;
+
     yields["NoSelection"]+=1.0;
     yieldsw["NoSelection"]+=weight;
 
-    if(channel == "ee" && nElectrons == 2) passSel=true;
+    TH1Hists["hist_CutFlow"].Fill(0.0);
+    TH1Hists["hist_CutFlow_Weighted"].Fill(0.0,weight);
+
+    if(channel == "ee" && (nElectrons == 2 && nMuons == 0) ) passSel=true;
     else if(channel == "emu" && (nElectrons == 1 && nMuons == 1) ) passSel=true;
-    else if(channel == "mumu" && nMuons ==2) passSel=true;
+    else if(channel == "mumu" && (nElectrons == 0 && nMuons == 2) ) passSel=true;
 
     if(!passSel) continue;
 
-    if(channel == "ee"){ yields["2ELectrons"] += 1.0; yieldsw["2ELectrons"] += weight;}
-    if(channel == "emu"){ yields["1ELec1Muon"] += 1.0; yieldsw["1Elec1Muon"] += weight;}
-    if(channel == "mumu"){ yields["2Muons"] += 1.0; yieldsw["2Muons"] += weight;}
+    if(channel == "ee"){ yields["2Electrons"] += 1.0; yieldsw["2Electrons"] += weight;
+      TH1Hists["hist_CutFlow"].Fill(1.0);
+      TH1Hists["hist_CutFlow_Weighted"].Fill(1.0,weight);
+    }
+    if(channel == "emu"){ yields["1Elec1Muon"] += 1.0; yieldsw["1Elec1Muon"] += weight;
+      TH1Hists["hist_CutFlow"].Fill(2.0);
+      TH1Hists["hist_CutFlow_Weighted"].Fill(2.0,weight);
+    }
+    if(channel == "mumu"){ yields["2Muons"] += 1.0; yieldsw["2Muons"] += weight;
+      TH1Hists["hist_CutFlow"].Fill(3.0);
+      TH1Hists["hist_CutFlow_Weighted"].Fill(3.0,weight);
+    }
 
-    //std::cout << "nElectrons= " << nElectrons << "nMuons= " << nMuons << std::endl;
+    if(m_debug) std::cout << "nElectrons= " << nElectrons << " nMuons= " << nMuons << std::endl;
 
-    //std::cout << "nJets: " << branchJet->GetEntries() << std::endl;
+    if(m_debug) std::cout << "nJets: " << branchJet->GetEntries() << std::endl;
 
     Electron *el1, *el2;
     Muon *mu1, *mu2;
@@ -283,54 +353,75 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
     charge.push_back(charge2);
 
     njets = jetz.size();
-    //std::cout << "nJets: " << njets << std::endl;
+    if(m_debug) std::cout << "nJets: " << njets << std::endl;
 
     bool isChFlip = false;
     int initsign=charge.at(0)*charge.at(1);
 
-    //int nElectrons = branchElectron->GetEntries();
+    if(initsign == -1){
+      TH1Hists["hist_VR_OS_nJets"].Fill(njets,weight);
+      TH1Hists["hist_VR_OS_HT"].Fill(HT,weight);
+    }
 
+    //int nElectrons = branchElectron->GetEntries();
+    //float weight_nochflip = weight;
     //Only do charge flip for electrons
+    prob.clear();
     for(UInt_t iel=0;iel<nElectrons;iel++){
-      rand = random->Rndm();
+      //rand = random->Rndm();
       Electron *el = (Electron *) electrons.at(iel);
       if(el->PT > 15 && el->PT<100){
-        Int_t binx=lowPt->GetXaxis()->FindBin(el->Eta);
+        Int_t binx=lowPt->GetXaxis()->FindBin(fabs(el->Eta));
         float cfeff=lowPt->GetBinContent(binx);
-        if(rand<cfeff) {
+        if(m_debug) std::cout << "weight: "<<weight<<" cfeff: " << cfeff<< " eta: " << el->Eta << " pt: " << el->PT << std::endl;
+        prob.push_back(cfeff);
+        /*if(rand<cfeff) {
           std::cout << "Initial charge: " << charge[iel] << std::endl;
           charge[iel] *=-1;
           std::cout << "Charge flipped: " << charge[iel] << " elePt: " << el->PT << " eleEta: " << el->Eta << std::endl;
-        }
+        }*/
       }else if (el->PT > 100 && el->PT < 200){
-        Int_t binx=mediumPt->GetXaxis()->FindBin(el->Eta);
+        Int_t binx=mediumPt->GetXaxis()->FindBin(fabs(el->Eta));
         float cfeff=mediumPt->GetBinContent(binx);
-        if(rand<cfeff) {
+        if(m_debug) std::cout << "weight: "<<weight<<" cfeff: " << cfeff<< " eta: " << el->Eta << " pt: " << el->PT << std::endl;
+        prob.push_back(cfeff);
+        /*if(rand<cfeff) {
           std::cout << "Initial charge: " << charge[iel] << std::endl;
           charge[iel] *=-1;
           std::cout << "Charge flipped: " << charge[iel] << " elePt: " << el->PT << " eleEta: " << el->Eta << std::endl;
-        }
+        }*/
       }else if (el->PT > 200 && el->PT < 1000){
-        Int_t binx=highPt->GetXaxis()->FindBin(el->Eta);
+        Int_t binx=highPt->GetXaxis()->FindBin(fabs(el->Eta));
         float cfeff=highPt->GetBinContent(binx);
-        if(rand<cfeff) {
+        if(m_debug) std::cout << "weight: "<<weight<<" cfeff: " << cfeff<< " eta: " << el->Eta << " pt: " << el->PT << std::endl;
+        prob.push_back(cfeff);
+        /*if(rand<cfeff) {
           std::cout << "Initial charge: " << charge[iel] << std::endl;
           charge[iel] *=-1;
           std::cout << "Charge flipped: " << charge[iel] << " elePt: " << el->PT << " eleEta: " << el->Eta << std::endl;
-        }
+        }*/
       }
     }
 
-    int finalsign=charge.at(0)*charge.at(1);
+    if(channel=="ee" && initsign == -1){
+      float totprob = (prob.at(0)*(1-prob.at(1))+ prob.at(1)*(1-prob.at(0)));
+      weight *= totprob;
+    }else if(channel=="emu" && initsign == -1){
+      weight *= prob.at(0);
+    }
 
-    if(initsign != finalsign) isChFlip=true;
+    //int finalsign=charge.at(0)*charge.at(1);
 
-    if(charge.at(0)*charge.at(1)<0) continue;
+    //if(initsign != finalsign) isChFlip=true;
+
+    if(initsign == -1 && channel == "mumu") continue;
 
     yields["SSLeptons"]  += 1.0;
     yieldsw["SSLeptons"] += weight;
+    TH1Hists["hist_CutFlow"].Fill(4.0);
+    TH1Hists["hist_CutFlow_Weighted"].Fill(4.0,weight);
 
-    std::cout << "SS event selected " << weight << std::endl;
+    if(m_debug) std::cout << "SS event selected " << weight << std::endl;
 
     //Get the leading jet
     if(njets!=0) jet=jetz.at(0);
@@ -350,12 +441,12 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
     //Only apply the factor for events with 2 or more jets
     if(njets >= 2 && (tag.find("signal") == std::string::npos) && apply_reweight == true) {
       weight *= sfactor;
-      std::cout << "SF: " << sfactor << std::endl;
+      if(m_debug) std::cout << "SF: " << sfactor << std::endl;
     }
 
     TH1Hists["hist_VR_nJets"].Fill(njets,weight);
 
-    if(!isChFlip){
+    //if(!isChFlip){
         if(njets>=4){
           if(channel=="ee"){
             TH1Hists["hist_SR_ElePT"].Fill(el1->PT,weight);
@@ -400,8 +491,8 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
           TH1Hists["hist_VR_JetPT"].Fill(jet->PT,weight);
           TH1Hists["hist_VR_JetEta"].Fill(jet->Eta,weight);
         }
-    }
-    else {
+    //}
+    //else {
         if(njets>=4){
           if(channel=="ee"){
             TH1Hists["hist_SR_ElePT_chflip"].Fill(el1->PT,weight);
@@ -440,7 +531,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
         }
 
         if(njets!=0) TH1Hists["hist_VR_JetPT_chflip"].Fill(jet->PT,weight);
-    }
+    //}
 
     std::vector<TLorentzVector> leptoQuarks;
     TLorentzVector null4V(0,0,0,0);
@@ -450,7 +541,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
     if(branchMissingET->GetEntriesFast() > 0)
     {
       MissingET *met = (MissingET*) branchMissingET->At(0);
-      //cout << met->MET << endl;
+      if(m_debug) std::cout << met->MET << std::endl;
       if(njets>=4){
           TH1Hists["hist_SR_MET"].Fill(met->MET,weight);
       } else if(njets==0){
@@ -463,6 +554,8 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
 
     yields["MoreThan3Jets"] += 1.0;
     yields["MoreThan3Jets"] += weight;
+    TH1Hists["hist_CutFlow"].Fill(5.0);
+    TH1Hists["hist_CutFlow_Weighted"].Fill(5.0,weight);
 
     //Form the jet combinations
     std::vector<TLorentzVector> jets;
@@ -476,7 +569,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
        else if (icomb==2){comb.push_back(1);comb.push_back(3);comb.push_back(0);comb.push_back(2);}
        else if (icomb==3){comb.push_back(2);comb.push_back(3);comb.push_back(0);comb.push_back(1);}
 
-       //std::cout << "Combination: " << comb.at(0) << " " << comb.at(1) << " " << comb.at(2) << " " << comb.at(3) << std::endl;
+       if(m_debug) std::cout << "Combination: " << comb.at(0) << " " << comb.at(1) << " " << comb.at(2) << " " << comb.at(3) << std::endl;
 
        jets.clear();
 
@@ -493,7 +586,7 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
        //Electron *elec1, *elec2;
        //Muon *muon1, *muon2;
 
-       //std::cout << "seg fault is below this line" << electrons.size() << std::endl;
+       if(m_debug) std::cout << "seg fault is below this line" << electrons.size() << std::endl;
 
        if(channel=="ee")
        {
@@ -576,13 +669,13 @@ void processChain(std::string inputFile, std::string tag,std::string channel,std
   return;
 }
 
-void fillHists(std::string process,std::string pathFlag,std::string channel,bool hasMerge, int fileN)
+bool fillHists(std::string process, std::string pathFlag, std::string channel, bool hasMerge, int nFiles, int iFile, int fileI, int fileN)
 {
 
   gROOT->SetBatch(1);
-  gSystem->Load("libDelphes");
+  gSystem->Load("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/libDelphes");
 
-  gROOT->ProcessLine(".L loader.C+");
+  gROOT->ProcessLine(".L /user/e/edson/private/MG5_aMC_v2_3_3/Delphes/loader.C+");
 
   std::string path="";
 
@@ -609,10 +702,13 @@ void fillHists(std::string process,std::string pathFlag,std::string channel,bool
   yields  = initMap;
   yieldsw = initMap;
 
+  bool jobStatus = 0;
+
   for(UInt_t i=0;i<datasets.size();i++){
     std::cout << "Now running on process " << process << ", dataset:  " << datasets.at(i) << " and channel: " << channel << std::endl;
-    if(process.find("zjj") == std::string::npos) processChain(datasets.at(i),process,channel,path,hasMerge,0,fileN,yields,yieldsw);
-    else processChain(datasets.at(i),process,channel,path,hasMerge,30,fileN,yields,yieldsw);
+    jobStatus=processChain(datasets.at(i),process,channel,path,hasMerge,nFiles,iFile,fileI,fileN,yields,yieldsw);
+    //if(process.find("zjj") == std::string::npos) processChain(datasets.at(i),process,channel,path,hasMerge,0,fileI,fileN,yields,yieldsw);
+    //else processChain(datasets.at(i),process,channel,path,hasMerge,20,fileI,fileN,yields,yieldsw);
   }
 
 
@@ -626,7 +722,8 @@ void fillHists(std::string process,std::string pathFlag,std::string channel,bool
      std::cout << it1->first << " == " << it1->second << std::endl;
   }
 
-  exit();
+  //exit();
+  return jobStatus;
 
 }
 
@@ -689,7 +786,7 @@ float readAvMergedCS(std::string inputFileName, int &nevents)
       iss>>nb_events;
       iss>>cs_afterm;
       iss>>nEventsAM;
-      std::cout << "cs_read: " << cs_afterm << std::endl;
+      std::cout << "cs_read merged: " << cs_afterm << std::endl;
       if(cs_afterm!=0.0){
         av_cs+=cs_afterm;
         i++;
