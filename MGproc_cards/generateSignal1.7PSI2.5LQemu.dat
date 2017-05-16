@@ -1,0 +1,24 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model F8LQS
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+generate p p > go go, go > l- j j
+add process p p > go go, go > l+ j j
+output /data/user/e/edson/signal1.7PSI2.5LQemu
+shell cp /user/e/edson/private/MG5_aMC_v2_3_3/F1700LQ2500_emu.spc /data/user/e/edson/signal1.7PSI2.5LQemu/Cards/param_card.dat
+launch
+pythia=ON
+pgs=OFF
+delphes=ON
+set ebeam1 6500
+set ebeam2 6500
+set nevents 200000
+launch /data/user/e/edson/signal1.7PSI2.5LQemu -i
+print_results --path=/data/user/e/edson/signal1.7PSI2.5LQemu/cs.txt --format=short

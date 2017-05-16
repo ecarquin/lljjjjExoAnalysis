@@ -1,0 +1,30 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s b u~ c~ d~ s~ b~
+define j = g u c d s b u~ c~ d~ s~ b~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+generate p p > z j j, z > l+ l-
+#add process p p > z j j j, z > l+ l- @1
+#add process p p > z j j j j, z > l+ l- @2
+output /data/atlas/dbetalhc/zjjhpT
+launch /data/atlas/dbetalhc/zjjhpT -i
+multi_run 30
+pythia=ON
+pgs=OFF
+delphes=ON
+set run_card ptj 300
+set cut_decays True
+set ptb 300
+set ptl 40
+#set ickkw 1
+#set xqcut 10
+set ebeam1 6500
+set ebeam2 6500
+set nevents 200000
+print_results --path=/data/atlas/dbetalhc/zjjhpT/cs.txt --format=short

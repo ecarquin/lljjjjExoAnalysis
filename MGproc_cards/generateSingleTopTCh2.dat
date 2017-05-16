@@ -1,0 +1,28 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s u~ c~ d~ s~
+define q = u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+generate q g > t q b~
+add process q g > t~ q b
+output /data/user/e/edson/singleTopTCh2
+launch
+pythia=ON
+pgs=OFF
+delphes=ON
+set run_card ptj 40
+#set cut_decays False
+set ptb 40
+set ptl 40
+set ebeam1 6500
+set ebeam2 6500
+set nevents 10000
+launch /data/user/e/edson/singleTopTCh2 -i
+print_results --path=/data/user/e/edson/singleTopTCh2/cs.txt --format=short

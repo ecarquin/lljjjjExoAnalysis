@@ -1,0 +1,23 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set gauge unitary
+set complex_mass_scheme False
+import model sm
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+generate p p > j j z, (z > vl vl~)
+output /data/user/e/edson/INDMSamples/znunu
+launch /data/user/e/edson/INDMSamples/znunu -i
+multi_run 20
+pythia=ON
+pgs=OFF
+delphes=ON
+set WH 0.0041
+set ebeam1 6500
+set ebeam2 6500
+set nevents 100000
+print_results --path=/data/user/e/edson/INDMSamples/znunu/cs.txt --format=short
