@@ -3,12 +3,36 @@ channel=["ee","emu","mumu"]
 #channel=["ee"]
 
 #Launch the full production
-#process_bkg = ["zjjBig","wwjj","zw","ttbarlep","zz","twlep","ttw","ttz","ww","signal1.5PSI2.5LQemu","signal1.6PSI2.5LQemu","signal1.7PSI2.5LQemu","signal1.8PSI2.5LQemu","signal1.9PSI2.5LQemu","signal2.0PSI2.5LQemu","signal2.1PSI2.5LQemu","signal2.2PSI2.5LQemu","signal2.3PSI2.5LQemu","signal2.4PSI2.5LQemu","signal2.0PSI1.5LQemu","signal2.5PSI2.6LQemu","signal1.5PSI2.5LQee","signal2.0PSI2.5LQee","signal1.5PSI2.5LQmumu","signal2.0PSI2.5LQmumu"]
-#path_bkg    = [       1,     1,   0,         0,   0,      0,    0,    0,   0,                     0,                     0,                     0,                     0,                     0,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                    1,                    1,                      1,                      1]
-#nSplit      = [      20,    50,  40,       100,  50,     20,    5,    5, 100,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                   20,                   20,                     20,                     20]
-#isSplit     = [       1,     1,   1,         1,   1,      1,    1,    1,   1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                    1,                    1,                      1,                      1]
-#isMerged    = [       1,     0,   0,         0,   0,      0,    0,    0,   0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                    0,                    0,                      0,                      0]
-#nFile_s     = [      20,    -1,  -1,        -1,  -1,     -1,   -1,   -1,  -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                   -1,                   -1,                     -1,                     -1]
+#process_bkg = ["zjjBig","wwjj","zw","ttbarlep","zz","twlep","ttw","ttz","ww"]
+#path_bkg    = [       1,     1,   0,         0,   0,      0,    0,    0,   0]
+#nSplit      = [      20,    50,  40,       100,  50,     20,    5,    5, 100]
+#isSplit     = [       1,     1,   1,         1,   1,      1,    1,    1,   1]
+#isMerged    = [       1,     0,   0,         0,   0,      0,    0,    0,   0]
+#nFile_s     = [      20,    -1,  -1,        -1,  -1,     -1,   -1,   -1,  -1]
+
+#Launch the full production
+#process_bkg = ["signal1.5PSI2.5LQemu","signal1.6PSI2.5LQemu","signal1.7PSI2.5LQemu","signal1.8PSI2.5LQemu","signal1.9PSI2.5LQemu","signal2.0PSI2.5LQemu","signal2.1PSI2.5LQemu","signal2.2PSI2.5LQemu","signal2.3PSI2.5LQemu","signal2.4PSI2.5LQemu","signal2.5PSI2.6LQemu"]
+#path_bkg    = [                     0,                     0,                     0,                     0,                     0,                     1,                     1,                     1,                     1,                     1,                     1]
+#nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]
+#isSplit     = [                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1]
+#isMerged    = [                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0]
+#nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]
+
+#Launch the full production
+#process_bkg = ["signal1.5PSI2.5LQmumu","signal1.6PSI2.5LQmumu","signal1.7PSI2.5LQmumu","signal1.8PSI2.5LQmumu","signal1.9PSI2.5LQmumu","signal2.0PSI2.5LQmumu","signal2.1PSI2.5LQmumu","signal2.2PSI2.5LQmumu","signal2.3PSI2.5LQmumu","signal2.4PSI2.5LQmumu"]
+#path_bkg    = [                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1]
+#nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]
+#isSplit     = [                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1]
+#isMerged    = [                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0]
+#nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]
+
+#Launch the full production
+process_bkg = ["signal1.5PSI2.5LQee","signal1.6PSI2.5LQee","signal1.7PSI2.5LQee","signal1.8PSI2.5LQee","signal1.9PSI2.5LQee","signal2.0PSI2.5LQee","signal2.1PSI2.5LQee","signal2.2PSI2.5LQee","signal2.3PSI2.5LQee","signal2.4PSI2.5LQee"]          
+path_bkg    = [                     0,                     0,                     0,                     0,                     0,                     1,                     1,                     1,                     1,                     1]
+nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]
+isSplit     = [                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1,                     1]
+isMerged    = [                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0,                     0]
+nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]
 
 #Launch the full production
 #process_bkg = ["wwjj","zw","ttbarlep","zz","twlep","ttw","ttz","ww","signal1.5PSI2.5LQemu","signal1.6PSI2.5LQemu","signal1.7PSI2.5LQemu","signal1.8PSI2.5LQemu","signal1.9PSI2.5LQemu","signal2.0PSI2.5LQemu","signal2.1PSI2.5LQemu","signal2.2PSI2.5LQemu","signal2.3PSI2.5LQemu","signal2.4PSI2.5LQemu","signal2.0PSI1.5LQemu","signal2.5PSI2.6LQemu","signal1.5PSI2.5LQee","signal2.0PSI2.5LQee","signal1.5PSI2.5LQmumu","signal2.0PSI2.5LQmumu"]
@@ -18,12 +42,12 @@ channel=["ee","emu","mumu"]
 #isMerged = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 #Launch the production on a subset of samples
-process_bkg = ["zjjBig"]
-path_bkg    = [       1]
-nSplit      = [      20]
-isSplit     = [       1]
-isMerged    = [       1]
-nFile_s     = [      20]
+#process_bkg = ["zjjBig"]
+#path_bkg    = [       1]
+#nSplit      = [      20]
+#isSplit     = [       1]
+#isMerged    = [       1]
+#nFile_s     = [      20]
 
 #Launch the production on a subset of samples
 #process_bkg = ["ttbarlep"]

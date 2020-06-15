@@ -16,7 +16,7 @@ nFile_s     = [      20,    -1,  -1,        -1,  -1,     -1,   -1,   -1,  -1,   
 #nSplit = [20]
 #nFile_s = [20]
 
-tag = '09_03_17/'
+tag = '30_03_17/'
 #os.system('mkdir '+tag+' ')
 root_path = '/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/'
 #os.chdir('09_03_17')

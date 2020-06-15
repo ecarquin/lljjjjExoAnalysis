@@ -19,21 +19,23 @@
 #include <string>
 #include <sstream>
 
-std::string outDir = "09_03_17/";
+//std::string outDir = "01_08_17/";
+std::string outDir = "22_01_19/";
+//std::string outDir = "TEST/";
 bool m_debug=false;
 
 bool processChain(std::string inputFile, std::string tag,std::string channel,std::string path, bool hasMerge, int nFiles, int iFile, int fileI, int fileN, std::map<std::string,float>& yields, std::map<std::string,float>& yieldsw)
 {
 
   // Variables
-  float lum = 100; //in fb^{-1}
-  bool apply_reweight=false;
+  float lum = 300.; //in fb^{-1}
+  bool apply_reweight=true;
   float cs;
 
   int Nevents = 0;
-  std::string cs_name = path+tag+"/cs.txt";
+  std::string cs_name = path+"cs.txt";
   std::cout << "cs_name: " << cs_name << std::endl;
-  if(!hasMerge) cs = readCS(cs_name,Nevents);
+  if(!hasMerge) cs = readCS(cs_name,Nevents,tag);
   else cs = readAvMergedCS(cs_name,Nevents);
 
   TFile *f = TFile::Open("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/chargeFlipAtlas.root","READ");
@@ -73,9 +75,15 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
 
   float xBins[14] = {24.0,30.0,40.0,50.0,60.0,70.0,90.0,110.0,130.0,150.0,200.0,250.0,500.0,800.0};
 
-  TFile *SF = TFile::Open("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/SF.root","READ");
-  TH1F* sf_ee=(TH1F*)SF->Get("sf_ee");
-  TH1F* sf_mumu=(TH1F*)SF->Get("sf_mumu");
+  TFile *SF=TFile::Open("/user/e/edson/madGraph/generate/NJetsSFs.root","READ");
+  if(tag.find("zjets") != std::string::npos) TH1F *h_SF=(TH1F*)SF->Get("h_zjets");
+  else if(tag.find("ttbarlep") != std::string::npos){
+   TH1F *h_SF=(TH1F*)SF->Get("h_ttbarlep");
+  }
+
+  //TFile *SF = TFile::Open("/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/SF.root","READ");
+  //TH1F* sf_ee=(TH1F*)SF->Get("sf_ee");
+  //TH1F* sf_mumu=(TH1F*)SF->Get("sf_mumu");
 
   // Book histograms
   std::map<std::string, TH1F> TH1Hists;
@@ -97,8 +105,8 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
   }
 
   TH1Hists["hist_SR_MET"] = TH1F("hist_SR_MET", "MET", 40, 0.0, 400.0);
-  TH1Hists["hist_SR_LQMassE"] = TH1F("hist_SR_LQMassE","LQ mass electron",34,100.0,3500.0);
-  TH1Hists["hist_SR_LQMassMU"] = TH1F("hist_SR_LQMassMU","LQ mass muon",34,100.0,3500.0);
+  TH1Hists["hist_SR_LQMassE"] = TH1F("hist_SR_LQMassE","#Psi mass electron",34,100.0,3500.0);
+  TH1Hists["hist_SR_LQMassMU"] = TH1F("hist_SR_LQMassMU","#Psi mass muon",34,100.0,3500.0);
 
   TH1Hists["hist_SR_emujjjjMass"] = TH1F("hist_SR_emujjjjMass","emujjjj Mass",38,200.0,4000.0);
   TH1Hists["hist_SR_Hemujjjj"] = TH1F("hist_SR_Hemujjjj","Hemujjjj ",39,100.0,4000.0);
@@ -109,7 +117,14 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
   TH1Hists["hist_SR_eejjjjMass"] = TH1F("hist_SR_eejjjjMass","eejjjj Mass",38,200.0,4000.0);
   TH1Hists["hist_SR_Heejjjj"] = TH1F("hist_SR_Heejjjj","Heejjjj ",39,100.0,4000.0);
 
+  TH1Hists["hist_SR_Jet_HT"] = TH1F("hist_SR_Jet_HT","Jet HT ",39,100.0,4000.0);
+
   TH1Hists["hist_SR_nJets"] = TH1F("hist_SR_nJets","N-Jets",6,-0.5,5.5);
+
+  TH1Hists["hist_SR_dPhi_l1jet"] = TH1F("hist_SR_dPhi_l1jet","dPhi l1jet",50,0,3.6);
+  TH1Hists["hist_SR_dPhi_l2jet"] = TH1F("hist_SR_dPhi_l2jet","dPhi l2jet",50,0,3.6);
+
+  TH1Hists["hist_SR_dPhi_jj"] = TH1F("hist_SR_dPhi_jj","dPhi jj",50,0,3.6);
 
   // Book histograms
   TH1Hists["hist_CR_ElePT"] = TH1F("hist_CR_ElePT", "Electron P_{T}", 20, 0.0, 200.0);
@@ -142,6 +157,10 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
   TH1Hists["hist_VR_nJets"] = TH1F("hist_VR_nJets","N-Jets",6,-0.5,5.5);
   TH1Hists["hist_VR_OS_nJets"] = TH1F("hist_VR_OS_nJets","N-Jets OS",6,-0.5,5.5);
   TH1Hists["hist_VR_OS_HT"] = TH1F("hist_VR_OS_HT","HT OS",200,0.0,4000.0);
+  TH1Hists["hist_VR_OS_JET_HT"] = TH1F("hist_VR_OS_JET_HT","JET HT OS",200,0.0,4000.0);
+  TH1Hists["hist_VR_OS_Mee"] = TH1F("hist_VR_OS_Mee","Mee",100,0,200);
+  TH1Hists["hist_VR_OS_Mee"].SetYTitle("Events");
+  TH1Hists["hist_VR_OS_Mee"].SetXTitle("M [GeV]");
 
   TH1Hists["hist_SR_Mee"] = TH1F("hist_SR_Mee","Mee",100,0,200);
 
@@ -153,6 +172,9 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
 
   TH1Hists["hist_VR_OS_HT"].SetYTitle("Events");
   TH1Hists["hist_VR_OS_HT"].SetXTitle("HT [GeV]");
+
+  TH1Hists["hist_VR_OS_JET_HT"].SetYTitle("Events");
+  TH1Hists["hist_VR_OS_JET_HT"].SetXTitle("JET HT [GeV]");
 
   TH1Hists["hist_SR_LQMassE"].SetYTitle("Events");
   TH1Hists["hist_SR_LQMassE"].SetXTitle("m_{ejj} [GeV]");
@@ -247,18 +269,20 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
     //return 1;
   }
 
+  int oneEEvents=0;
+  int zeroEEvents=0;
   // Loop over all events
   for(Int_t entry = istart; entry < iends; ++entry)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-    //std::cout << "Entry: " << entry << std::endl;
+    if(m_debug) std::cout << "Entry: " << entry << std::endl;
     if(entry%1000==0){
       std::cout << "Entry: " << entry << std::endl;
       const char* command="date \"+%H:%M:%S   %d/%m/%y\"";
       gSystem->Exec(command);
     }
-    //if(entry==1000) break;
+    //if(entry==100) break;
 
     float HT=0.0;
 
@@ -268,7 +292,9 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
        Electron *el=(Electron*)branchElectron->At(i);
        Int_t binx=lowPt->GetXaxis()->FindBin(fabs(el->Eta));
        if(binx==4) continue;
+       if(m_debug) std::cout << "Electron Pt: " << el->PT << std::endl; 
        if(fabs(el->Eta) < 2.47 && el->PT > 20) {electrons.push_back(el);HT+=el->PT;}
+       //electrons.push_back(el);HT+=el->PT;
     }
 
     //Get muons
@@ -278,11 +304,13 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
        if(fabs(mu->Eta) < 2.5 && mu->PT > 20) {muons.push_back(mu);HT+=mu->PT;}
     }
 
+    float Jet_HT=0.0;
+
     //Get jets
     std::vector<Jet*> jetz;
     for(unsigned int i=0;i<branchJet->GetEntries();i++){
        Jet *jet=(Jet*)branchJet->At(i);
-       if(fabs(jet->Eta) < 2.8 && jet->PT > 20) {jetz.push_back(jet);HT+=jet->PT;}
+       if(fabs(jet->Eta) < 2.8 && jet->PT > 20) {jetz.push_back(jet);HT+=jet->PT;Jet_HT+=jet->PT;}
     }
 
     int nElectrons = electrons.size();
@@ -301,6 +329,10 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
     if(channel == "ee" && (nElectrons == 2 && nMuons == 0) ) passSel=true;
     else if(channel == "emu" && (nElectrons == 1 && nMuons == 1) ) passSel=true;
     else if(channel == "mumu" && (nElectrons == 0 && nMuons == 2) ) passSel=true;
+    else if(channel == "ee" && nElectrons == 1) {oneEEvents++;if(m_debug)std::cout << "One electron event " << oneEEvents << std::endl;}
+    else if(channel == "ee" && nElectrons == 0) {zeroEEvents++;if(m_debug)std::cout << "Zero electron event " << zeroEEvents << std::endl;}
+    //else if(channel == "ee" && nMuons == 1) std::cout << "One muon event " << oneEEvents << std::endl;}
+    //else if(channel == "ee" && nMuons == 2) std::cout << "Two muoun event " << zeroEEvents << std::endl;}
 
     if(!passSel) continue;
 
@@ -334,6 +366,12 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
 
       charge1 = el1->Charge;
       charge2 = el2->Charge;
+
+      if(charge1*charge2=-1){
+        TLorentzVector ee = el1->P4()+el2->P4();
+        TH1Hists["hist_VR_OS_Mee"].Fill(ee.M(),weight);
+      }
+
     }else if(channel == "emu"){
       el1 = (Electron *) electrons.at(0);
       mu1 = (Muon *) muons.at(0);
@@ -360,7 +398,10 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
 
     if(initsign == -1){
       TH1Hists["hist_VR_OS_nJets"].Fill(njets,weight);
-      TH1Hists["hist_VR_OS_HT"].Fill(HT,weight);
+      if(njets>=4){
+         TH1Hists["hist_VR_OS_HT"].Fill(HT,weight);
+         TH1Hists["hist_VR_OS_JET_HT"].Fill(Jet_HT,weight);
+      }
     }
 
     //int nElectrons = branchElectron->GetEntries();
@@ -380,7 +421,7 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
           charge[iel] *=-1;
           std::cout << "Charge flipped: " << charge[iel] << " elePt: " << el->PT << " eleEta: " << el->Eta << std::endl;
         }*/
-      }else if (el->PT > 100 && el->PT < 200){
+      }else if (el->PT > 100. && el->PT < 200.){
         Int_t binx=mediumPt->GetXaxis()->FindBin(fabs(el->Eta));
         float cfeff=mediumPt->GetBinContent(binx);
         if(m_debug) std::cout << "weight: "<<weight<<" cfeff: " << cfeff<< " eta: " << el->Eta << " pt: " << el->PT << std::endl;
@@ -390,7 +431,7 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
           charge[iel] *=-1;
           std::cout << "Charge flipped: " << charge[iel] << " elePt: " << el->PT << " eleEta: " << el->Eta << std::endl;
         }*/
-      }else if (el->PT > 200 && el->PT < 1000){
+      }else if (el->PT > 200.){// && el->PT < 1000){ Apply the same efficiency for pT>1000
         Int_t binx=highPt->GetXaxis()->FindBin(fabs(el->Eta));
         float cfeff=highPt->GetBinContent(binx);
         if(m_debug) std::cout << "weight: "<<weight<<" cfeff: " << cfeff<< " eta: " << el->Eta << " pt: " << el->PT << std::endl;
@@ -429,19 +470,13 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
 
     float sfactor = 1.0;
 
-    //Applying weight factor according to number of jets and channel
-    if(channel == "ee" && apply_reweight == true) {
-      sfactor *= sf_ee->GetBinContent(njets+1);
-    }else if(channel == "emu" && apply_reweight == true){
-      sfactor *= sf_ee->GetBinContent(njets+1)*sf_mumu->GetBinContent(njets+1)/2;
-    }else if(channel == "mumu" && apply_reweight == true){
-      sfactor *= sf_mumu->GetBinContent(njets+1);
-    }
-
-    //Only apply the factor for events with 2 or more jets
-    if(njets >= 2 && (tag.find("signal") == std::string::npos) && apply_reweight == true) {
-      weight *= sfactor;
-      if(m_debug) std::cout << "SF: " << sfactor << std::endl;
+    //Applying weight factor according to number of jets and process
+    if(tag == "zjets" && apply_reweight == true) {
+      if(njets<=3) weight *= h_SF->GetBinContent(njets+1);
+      else if(njets>=4) weight *= h_SF->GetBinContent(5);
+    }else if(tag == "ttbarlep" && apply_reweight == true){
+      if(njets<=4) weight *= h_SF->GetBinContent(njets+1);
+      else if(njets>=5) weight *= h_SF->GetBinContent(6);
     }
 
     TH1Hists["hist_VR_nJets"].Fill(njets,weight);
@@ -557,78 +592,103 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
     TH1Hists["hist_CutFlow"].Fill(5.0);
     TH1Hists["hist_CutFlow_Weighted"].Fill(5.0,weight);
 
+    if(channel=="ee"){
+      TLorentzVector ee = el1->P4()+el2->P4();
+      if(m_debug) std::cout << "Mee: " << ee.M() << " El1Pt: " << el1->P4().Pt()<< " El2Pt: " << el2->P4().Pt() << std::endl;
+      if(ee.M() < 110) continue;
+    }
+
+    yields["MzCut"] += 1.0;
+    yields["MzCut"] += weight;
+    TH1Hists["hist_CutFlow"].Fill(6.0);
+    TH1Hists["hist_CutFlow_Weighted"].Fill(6.0,weight);
+
     //Form the jet combinations
     std::vector<TLorentzVector> jets;
 
-    for(UInt_t icomb=0;icomb<3;icomb++)
+    for(UInt_t icomb=0;icomb<6;icomb++)
     {
        std::vector<int> comb;
        comb.clear();
        if(icomb==0){comb.push_back(0);comb.push_back(1);comb.push_back(2);comb.push_back(3);}
        else if (icomb==1){comb.push_back(0);comb.push_back(2);comb.push_back(1);comb.push_back(3);}
-       else if (icomb==2){comb.push_back(1);comb.push_back(3);comb.push_back(0);comb.push_back(2);}
-       else if (icomb==3){comb.push_back(2);comb.push_back(3);comb.push_back(0);comb.push_back(1);}
+       else if (icomb==2){comb.push_back(0);comb.push_back(3);comb.push_back(1);comb.push_back(2);}
+       else if (icomb==3){comb.push_back(1);comb.push_back(2);comb.push_back(0);comb.push_back(3);}
+       else if (icomb==4){comb.push_back(1);comb.push_back(3);comb.push_back(0);comb.push_back(2);}
+       else if (icomb==5){comb.push_back(2);comb.push_back(3);comb.push_back(0);comb.push_back(1);}
 
        if(m_debug) std::cout << "Combination: " << comb.at(0) << " " << comb.at(1) << " " << comb.at(2) << " " << comb.at(3) << std::endl;
 
        jets.clear();
 
+       float dPhi = 0;
+
        for(UInt_t k = 0; k < jetz.size(); ++k)
        {
           if(k==4) break;
-          // Form the different jet combinations
-          Jet *jet = jetz.at(k);
+          // Form the different jet combinations (6 in total) with the harder jets
+          Jet *jet = jetz.at(comb.at(k));
           jets.push_back(jet->P4());
+          // Fill angular plots
+          if(icomb==0 && channel == "ee"){
+             dPhi = el1->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l1jet"].Fill(dPhi,weight);
+             dPhi = el2->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l2jet"].Fill(dPhi,weight);
+          } else if (icomb==0 && channel == "emu"){
+             dPhi = el1->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l1jet"].Fill(dPhi,weight);
+             dPhi = mu1->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l2jet"].Fill(dPhi,weight);
+          } else if (icomb==0 && channel == "mumu"){
+             dPhi = mu1->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l1jet"].Fill(dPhi,weight);
+             dPhi = mu2->P4().DeltaPhi(jet->P4());
+             TH1Hists["hist_SR_dPhi_l2jet"].Fill(dPhi,weight);
+          }
+
        }
 
        int index=1;
        Int_t ee_charge = 0;
-       //Electron *elec1, *elec2;
-       //Muon *muon1, *muon2;
 
        if(m_debug) std::cout << "seg fault is below this line" << electrons.size() << std::endl;
 
+       TLorentzVector LQ1, LQ2;
+       LQ1=null4V;LQ2=null4V;
+
+       LQ1 += jets.at(0); LQ1 += jets.at(1);
+       LQ2 += jets.at(2); LQ2 += jets.at(3);
+
+       std::string hist_name1="", hist_name2="";
+
+       dPhi = jets.at(0).DeltaPhi(jets.at(1));
+       TH1Hists["hist_SR_dPhi_jj"].Fill(dPhi,weight);
+
        if(channel=="ee")
        {
-            // Take first two electrons
-            //elec1 = (Electron *) electrons.at(0);
-            //elec2 = (Electron *) electrons.at(1);
+            LQ1 += el1->P4();
+            LQ2 += el2->P4();
 
-            TLorentzVector LQ;
-            LQ=null4V;
-            LQ += jets.at(0); LQ += jets.at(1); LQ += el1->P4();
-            TH1Hists["hist_SR_LQMassE"].Fill(LQ.M(),weight);
-            LQ=null4V;
-            LQ += jets.at(2); LQ += jets.at(3); LQ += el2->P4();
-            TH1Hists["hist_SR_LQMassE"].Fill(LQ.M(),weight);
+            hist_name1="hist_SR_LQMassE"; hist_name2="hist_SR_LQMassE";
 
        }else if(channel=="emu"){
-            // Take now 1 electron and 1 muon
-            //elec1 = (Electron *) electrons.at(0);
-            //muon1 = (Muon *) muons.at(0);
 
-            TLorentzVector LQ;
-            LQ=null4V;
-            LQ += jets.at(0); LQ += jets.at(1); LQ += el1->P4();
-            TH1Hists["hist_SR_LQMassE"].Fill(LQ.M(),weight);
-            LQ=null4V;
-            LQ += jets.at(2); LQ += jets.at(3); LQ += mu1->P4();
-            TH1Hists["hist_SR_LQMassMU"].Fill(LQ.M(),weight);
+            LQ1 += el1->P4();
+            LQ2 += mu1->P4();
+
+            hist_name1="hist_SR_LQMassE"; hist_name2="hist_SR_LQMassMU";
 
        }else if(channel=="mumu"){
-            // Take now two muons
-            //muon1 = (Muon *) muons.at(0);
-            //muon2 = (Muon *) muons.at(1);
 
-            TLorentzVector LQ;
-            LQ=null4V;
-            LQ += jets.at(0); LQ += jets.at(1); LQ += mu1->P4();
-            TH1Hists["hist_SR_LQMassMU"].Fill(LQ.M(),weight);
-            LQ=null4V;
-            LQ += jets.at(2); LQ += jets.at(3); LQ += mu2->P4();
-            TH1Hists["hist_SR_LQMassMU"].Fill(LQ.M(),weight);
+            LQ1 += mu1->P4();
+            LQ2 += mu2->P4();
+
+            hist_name1="hist_SR_LQMassMU"; hist_name2="hist_SR_LQMassMU";
        }
 
+       TH1Hists[hist_name1].Fill(LQ1.M(),weight);
+       TH1Hists[hist_name2].Fill(LQ2.M(),weight);
 
     }
 
@@ -636,6 +696,9 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
     Jet *jet2 = jetz.at(1);
     Jet *jet3 = jetz.at(2);
     Jet *jet4 = jetz.at(3);
+
+    float Jet_HT=jet1->PT+jet2->PT+jet3->PT+jet4->PT;
+    TH1Hists["hist_SR_Jet_HT"].Fill(Jet_HT,weight);
 
     if(channel=="ee"){
       TLorentzVector ee = el1->P4()+el2->P4();
@@ -669,6 +732,16 @@ bool processChain(std::string inputFile, std::string tag,std::string channel,std
   return;
 }
 
+// Meanings of the inputs for fillHists function
+// process: Select process to run over
+// pathFlag: (Deprecated only one path being used, will be removed soon)
+// channel: Select final state selection i.e. ee, emu, or mumu
+// hasMerge: (Deprecated run on sample produced with parton shower merging)
+// nFiles: (Deprecated currently only one file per process is being used)
+// iFile: (Deprecated index of file being used)
+// fileI: Index of file, when using splitting of the input file
+// fileN: Number of files to split inputFile (run on the input file using multiple jobs)
+
 bool fillHists(std::string process, std::string pathFlag, std::string channel, bool hasMerge, int nFiles, int iFile, int fileI, int fileN)
 {
 
@@ -682,11 +755,13 @@ bool fillHists(std::string process, std::string pathFlag, std::string channel, b
   const char* command=("mkdir "+outDir).c_str();
   gSystem->Exec(command);
 
-  if(pathFlag=="path1") path = "/data/atlas/dbetalhc/";
+  //if(pathFlag=="path1") path = "/data/atlas/dbetalhc/";
+  if(pathFlag=="path1") path = "/data/atlas/dbetalhc/prod01-root-files/";
   else if(pathFlag=="path0") path = "/data/user/e/edson/";
 
   std::vector<std::string> datasets;
-  datasets.push_back(path+process+"/Events/run_01/tag_1_delphes_events.root");
+  datasets.push_back(path+process+".root");
+  //datasets.push_back("");
 
   std::map< std::string, float > yields;
   std::map< std::string, float > yieldsw;
@@ -727,7 +802,7 @@ bool fillHists(std::string process, std::string pathFlag, std::string channel, b
 
 }
 
-float readCS(std::string inputFileName,int &nevents)
+float readCS(std::string inputFileName,int &nevents,std::string process)
 {
    std::cout << inputFileName << std::endl;
    std::ifstream inputFile(inputFileName.c_str());
@@ -742,13 +817,10 @@ float readCS(std::string inputFileName,int &nevents)
    int i=0;
    while(getline(inputFile, line)) {
       std::istringstream iss(line);
-      iss>>run_name;
       iss>>tag;
       iss>>cs;
-      iss>>error;
-      iss>>nb_events;
-      std::cout << "cs_read: " << cs << std::endl;
-      if(cs!=0.0){
+      std::cout << "cs_read: " << cs << " tag: " << tag << " process: "<< process << std::endl;
+      if(cs!=0.0 && tag==process){
         av_cs+=cs;
         i++;
       }
@@ -756,6 +828,8 @@ float readCS(std::string inputFileName,int &nevents)
    }
    av_cs=av_cs/i;
    std::cout << "av_cs: " << av_cs << " i: " << i << std::endl;
+   if(av_cs!=av_cs) av_cs=1.0;
+   std::cout <<"Final av_cs result: " << av_cs << std::endl;
    return av_cs;
    //std::cout << "cs_read: " << cs << std::endl;
    //return cs;
@@ -795,5 +869,7 @@ float readAvMergedCS(std::string inputFileName, int &nevents)
    }
    av_cs=av_cs/i;
    std::cout << "av_cs: " << av_cs << " i: " << i << std::endl;
+   if(av_cs!=av_cs) av_cs=1.0;
+   std::cout <<"Final av_cs result: " << av_cs << std::endl;
    return av_cs;
 }

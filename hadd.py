@@ -6,17 +6,32 @@ channel=["ee","emu","mumu"]
 #nSplit      = [      20,    50,  40,	   100,  50,     20,    5,    5, 100,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                   20,                   20,                     20,                     20]
 #nFile_s     = [      20,    -1,  -1,        -1,  -1,     -1,   -1,   -1,  -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                   -1,                   -1,                     -1,                     -1]
 
+#Launch the full production
+#process_bkg = ["signal1.5PSI2.5LQemu","signal1.6PSI2.5LQemu","signal1.7PSI2.5LQemu","signal1.8PSI2.5LQemu","signal1.9PSI2.5LQemu","signal2.0PSI2.5LQemu","signal2.1PSI2.5LQemu","signal2.2PSI2.5LQemu","signal2.3PSI2.5LQemu","signal2.4PSI2.5LQemu"]
+#nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]
+#nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]
+
+#Launch the full production
+#process_bkg = ["signal1.5PSI2.5LQmumu","signal1.6PSI2.5LQmumu","signal1.7PSI2.5LQmumu","signal1.8PSI2.5LQmumu","signal1.9PSI2.5LQmumu","signal2.0PSI2.5LQmumu","signal2.1PSI2.5LQmumu","signal2.2PSI2.5LQmumu","signal2.3PSI2.5LQmumu","signal2.4PSI2.5LQmumu"]
+#nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]                                                                                                        	  
+#nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]
+
+#Launch the full production
+process_bkg = ["signal1.5PSI2.5LQee","signal1.6PSI2.5LQee","signal1.7PSI2.5LQee","signal1.8PSI2.5LQee","signal1.9PSI2.5LQee","signal2.0PSI2.5LQee","signal2.1PSI2.5LQee","signal2.2PSI2.5LQee","signal2.3PSI2.5LQee","signal2.4PSI2.5LQee"]
+nSplit      = [                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20,                    20]
+nFile_s     = [                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1,                    -1]  
+
 #Launch the production on a subset of samples
-process_bkg = ["ttbarlep"]
-nSplit = [100]
-nFile_s = [-1]
+#process_bkg = ["ttbarlep"]
+#nSplit = [100]
+#nFile_s = [-1]
 
 #Launch the production on a subset of samples
 #process_bkg = ["zjjBig"]
 #nSplit = [20]
 #nFile_s = [20]
 
-tag = '09_03_17/'
+tag = '30_03_17/'
 os.system('mkdir '+tag+' ')
 root_path = '/user/e/edson/private/MG5_aMC_v2_3_3/Delphes/'
 #os.chdir('09_03_17')
